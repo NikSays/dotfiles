@@ -5,6 +5,8 @@
 !.ssh/config
 !.vim
 .vim/plugged
-!.oh-my-zsh
-!.oh-my-zsh/custom
 !.gitignore
+!.local
+!.local/share
+!.local/share/zsh-custom
+!.local/share/zsh-custom/**
