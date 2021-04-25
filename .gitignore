@@ -3,7 +3,8 @@
 !.vimrc
 !.ssh
 !.ssh/config
-!.vim
+!.vim/
+!.vim/**
 .vim/plugged
 !.gitignore
 !.local
