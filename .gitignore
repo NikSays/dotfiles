@@ -10,6 +10,7 @@
 !.local/share
 !.local/share/zsh-custom
 !.local/share/zsh-custom/**
-!.oh-my-zsh
+!.oh-my-zsh/
+!.oh-my-zsh/**
 !.github/
 !.github/**
