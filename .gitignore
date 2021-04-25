@@ -10,3 +10,4 @@
 !.local/share
 !.local/share/zsh-custom
 !.local/share/zsh-custom/**
+!.oh-my-zsh
