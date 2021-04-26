@@ -21,3 +21,7 @@
 !.local/share/sounds
 !.local/share/sounds/ns
 !.local/share/sounds/ns/**
+!.local
+!.local/bin
+!.local/bin/git-dotfile-track
+!.local/bin/git-dotfile-track/**
