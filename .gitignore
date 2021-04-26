@@ -5,6 +5,7 @@
 !.vim/
 !.vim/**
 .vim/plugged
+.vim/autoload
 !.gitignore
 !.local
 !.local/share
