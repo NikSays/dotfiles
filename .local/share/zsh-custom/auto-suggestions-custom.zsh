@@ -6,8 +6,9 @@
 # Color to use when highlighting suggestion
 # Uses format of `region_highlight`
 # More info: http://zsh.sourceforge.net/Doc/Release/Zsh-Line-Editor.html#Zle-Widgets
-(( ! ${+ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE} )) &&
-typeset -g ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=8'
+if [ $(tput colors) -gt 8 ]; then typeset -g ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=8'
+else typeset -g ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=0,bold'
+fi
 
 # Strategies to use to fetch a suggestion
 # Will try each strategy in order until a suggestion is returned
