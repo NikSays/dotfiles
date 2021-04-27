@@ -138,3 +138,6 @@ alias git-dotfile='/usr/bin/git --git-dir=$HOME/.dotfile-repo/ --work-tree=$HOME
 TZ='Asia/Jerusalem'; export TZ
 #powerline-daemon -q
 #. /usr/lib/python3.8/site-packages/powerline/bindings/zsh/powerline.zsh
+bindkey "^[OC" forward-char
+# r.arrow -> forward-char
+# ctrl+r.arrow -> forward-word
