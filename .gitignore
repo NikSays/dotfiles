@@ -2,10 +2,10 @@
 !.zshrc
 !.vimrc
 !.ssh
-!.ssh/config
 !.vim/
 !.vim/**
 .vim/plugged
+.vim/autoload
 !.gitignore
 !.local
 !.local/share
@@ -15,3 +15,14 @@
 !.oh-my-zsh/**
 !.github/
 !.github/**
+!.ssh
+!.ssh/config
+!.local
+!.local/share
+!.local/share/sounds
+!.local/share/sounds/ns
+!.local/share/sounds/ns/**
+!.local
+!.local/bin
+!.local/bin/git-dotfile-track
+!.local/bin/git-dotfile-track/**
