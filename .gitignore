@@ -16,8 +16,6 @@
 !.oh-my-zsh/**
 !.github/
 !.github/**
-!.ssh
-!.ssh/config
 !.local
 !.local/share
 !.local/share/sounds
