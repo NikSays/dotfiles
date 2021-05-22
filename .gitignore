@@ -1,7 +1,6 @@
 *
 !.zshrc
 !.vimrc
-!.ssh
 !.vim/
 !.vim/**
 .vim/plugged
