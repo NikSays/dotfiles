@@ -29,3 +29,8 @@
 !.local/share/gnome-shell
 !.local/share/gnome-shell/extensions
 !.local/share/gnome-shell/extensions/**
+!.local
+!.local/share
+!.local/share/wallpapers
+!.local/share/wallpapers/custom
+!.local/share/wallpapers/custom/**
