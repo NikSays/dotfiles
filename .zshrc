@@ -136,6 +136,8 @@ source $ZSH/oh-my-zsh.sh
 
 alias sudi="sudo -i"
 alias git-dotfile='/usr/bin/git --git-dir=$HOME/.dotfile-repo/ --work-tree=$HOME'
+alias dconf-extension-dump='dconf dump /org/gnome/shell/extensions/ > ~/.local/share/gnome-shell/extensions/extension-settings.dconf'
+alias dconf-extension-load='dconf load /org/gnome/shell/extensions/ < ~/.local/share/gnome-shell/extensions/extension-settings.dconf'
 TZ='Asia/Jerusalem'; export TZ
 #powerline-daemon -q
 #. /usr/lib/python3.8/site-packages/powerline/bindings/zsh/powerline.zsh
