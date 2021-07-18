@@ -4,7 +4,8 @@ size=18
 vertical=41
 
 [caffeine]
-control-nightlight=true
+nightlight-control='always'
+user-enabled=true
 
 [clipboard-indicator]
 clear-history=['<Primary><Alt>x']
@@ -13,6 +14,21 @@ history-size=50
 next-entry=['<Primary><Alt>v']
 prev-entry=['<Primary><Shift><Alt>v']
 toggle-menu=['<Primary><Alt>c']
+
+[dash-to-dock]
+apply-custom-theme=false
+background-opacity=0.80000000000000004
+custom-theme-customize-running-dots=false
+custom-theme-shrink=true
+dash-max-icon-size=43
+dock-position='BOTTOM'
+force-straight-corner=false
+height-fraction=0.89000000000000001
+preview-size-scale=0.0
+running-indicator-dominant-color=true
+running-indicator-style='DASHES'
+transparency-mode='DYNAMIC'
+unity-backlit-items=false
 
 [lockkeys]
 style='show-hide'
@@ -23,6 +39,11 @@ skip-frames-before-spring-start=8.0
 [panel-osd]
 test-notification=false
 x-pos=100.0
+
+[pop-shell]
+pop-monitor-left=@as []
+pop-workspace-down=@as []
+tile-enter=['<Super>Return']
 
 [user-theme]
 name='Matcha-dark-sea'
