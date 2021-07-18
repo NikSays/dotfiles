@@ -153,7 +153,7 @@ TZ='Asia/Jerusalem'; export TZ
 bindkey "^[OC" forward-char
 # r.arrow -> forward-char
 # ctrl+r.arrow -> forward-word
-source /home/niksays/.local/share/zsh-custom/themes/powerlevel10k/powerlevel9k.zsh-theme
+source $ZSH_CUSTOM/themes/powerlevel10k/powerlevel9k.zsh-theme
 
 POW_SRC=~/.p10k.zsh
 if [ $(tput colors) -gt 8 ]; then

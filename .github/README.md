@@ -7,4 +7,4 @@ First, add ssh keys to github
 
 `git --git-dir=$HOME/.dotfile-repo/ --work-tree=$HOME checkout`
 
-`git --git-dir=$HOME/.dotfile-repo/ --work-tree=$HOME update --recursive --init`
+`git --git-dir=$HOME/.dotfile-repo/ --work-tree=$HOME submodule update --recursive --init`
