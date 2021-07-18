@@ -1,3 +1,22 @@
+/*
+    Copyright © 2020, 2021 Aleksandr Mezin
+
+    This file is part of ddterm GNOME Shell extension.
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
 'use strict';
 
 /* exported TerminalPage */
@@ -61,11 +80,6 @@ const REGEX_URL_VOIP = compile_regex(urldetect_patterns.REGEX_URL_VOIP);
 const REGEX_EMAIL = compile_regex(urldetect_patterns.REGEX_EMAIL);
 const REGEX_NEWS_MAN = compile_regex(urldetect_patterns.REGEX_NEWS_MAN);
 
-function terminal_spawn_callback(terminal, _pid, error) {
-    if (error)
-        terminal.feed(error.message);
-}
-
 GObject.type_ensure(Vte.Terminal);
 
 var TerminalPage = GObject.registerClass(
@@ -118,6 +132,7 @@ var TerminalPage = GObject.registerClass(
             this.clicked_hyperlink = null;
             this.url_prefix = {};
             this.clipboard = Gtk.Clipboard.get_default(Gdk.Display.get_default());
+            this.child_pid = null;
 
             this._switch_shortcut = null;
 
@@ -158,6 +173,7 @@ var TerminalPage = GObject.registerClass(
 
             this.method_handler(this.settings, 'changed::background-color', this.update_color_background);
             this.method_handler(this.settings, 'changed::background-opacity', this.update_color_background);
+            this.method_handler(this.settings, 'changed::transparent-background', this.update_color_background);
             this.method_handler(this.terminal, 'style-updated', this.update_color_background);
 
             this.method_handler(this.settings, 'changed::bold-color', this.update_color_bold);
@@ -277,7 +293,19 @@ var TerminalPage = GObject.registerClass(
             return this.clicked_hyperlink !== null;
         }
 
-        spawn() {
+        get_cwd() {
+            const uri = this.terminal.current_directory_uri;
+            if (uri)
+                return GLib.filename_from_uri(uri)[0];
+
+            try {
+                return GLib.file_read_link(`/proc/${this.child_pid}/cwd`);
+            } catch {
+                return null;
+            }
+        }
+
+        spawn(cwd = null) {
             let argv;
             let spawn_flags;
 
@@ -307,9 +335,13 @@ var TerminalPage = GObject.registerClass(
                 return;
             }
 
-            this.terminal.spawn_async(
-                Vte.PtyFlags.DEFAULT, null, argv, null, spawn_flags, null, -1, null, terminal_spawn_callback
-            );
+            this.terminal.spawn_async(Vte.PtyFlags.DEFAULT, cwd, argv, null, spawn_flags, null, -1, null, (terminal, pid, error) => {
+                if (error)
+                    terminal.feed(error.message);
+
+                if (pid)
+                    this.child_pid = pid;
+            });
         }
 
         close_request() {
@@ -358,7 +390,10 @@ var TerminalPage = GObject.registerClass(
 
         get_color_background() {
             const background = this.get_style_color_settings('background-color', 'background-color');
-            background.alpha = this.settings.get_double('background-opacity');
+
+            if (this.settings.get_boolean('transparent-background'))
+                background.alpha = this.settings.get_double('background-opacity');
+
             return background;
         }
 

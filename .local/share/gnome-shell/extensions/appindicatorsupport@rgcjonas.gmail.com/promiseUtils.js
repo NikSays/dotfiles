@@ -14,14 +14,29 @@ var CancellablePromise = class extends Promise {
         if (cancellable && !(cancellable instanceof Gio.Cancellable))
             throw TypeError('cancellable parameter is not a Gio.Cancellable');
 
+        const cancelled = cancellable && cancellable.is_cancelled();
+        let cancellationId;
         let rejector;
-        let cancelled;
+
+        if (cancellable && !cancelled)
+            cancellationId = cancellable.connect(() => this.cancel());
+
         super((resolve, reject) => {
             rejector = reject;
-            if (cancellable && cancellable.is_cancelled()) {
-                cancelled = true;
+            if (cancelled) {
                 reject(new GLib.Error(Gio.IOErrorEnum,
                     Gio.IOErrorEnum.CANCELLED, 'Promise cancelled'));
+            } else if (cancellationId) {
+                rejector = (...args) => {
+                    reject(...args);
+                    // This must happen in an idle not to deadlock on ::cancelled
+                    GLib.idle_add(GLib.PRIORITY_DEFAULT_IDLE, () =>
+                        cancellable.disconnect(cancellationId));
+                };
+                executor((...args) => {
+                    resolve(...args);
+                    cancellable.disconnect(cancellationId);
+                }, rejector);
             } else {
                 executor(resolve, reject);
             }
@@ -29,10 +44,7 @@ var CancellablePromise = class extends Promise {
 
         this._cancelled = cancelled;
         this._rejector = rejector;
-
         this._cancellable = cancellable || null;
-        if (this._cancellable)
-            this._cancellable.connect(() => this.cancel());
     }
 
     get cancellable() {
@@ -168,6 +180,9 @@ var GSourcePromise = class extends CancellablePromise {
         }, cancellable);
 
         this._gsource = gsource;
+
+        if (this.cancelled())
+            this.remove();
     }
 
     remove() {

@@ -1,3 +1,11 @@
+# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
+# Initialization code that may require console input (password prompts, [y/n]
+# confirmations, etc.) must go above this block; everything else may go below.
+POWERLEVEL9K_DISABLE_CONFIGURATION_WIZARD=true
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+
 
 # The following lines were added by compinstall
 
@@ -41,7 +49,7 @@ bindkey -e
 # load a random theme each time oh-my-zsh is loaded, in which case,
 # to know which specific one was loaded, run: echo $RANDOM_THEME
 # See https://github.com/robbyrussell/oh-my-zsh/wiki/Themes
-ZSH_THEME="ns"
+#ZSH_THEME="ns"
 
 # Set list of themes to pick from when loading at random
 # Setting this variable when ZSH_THEME=random will cause zsh to load
@@ -138,9 +146,19 @@ alias sudi="sudo -i"
 alias git-dotfile='/usr/bin/git --git-dir=$HOME/.dotfile-repo/ --work-tree=$HOME'
 alias dconf-extension-dump='dconf dump /org/gnome/shell/extensions/ > ~/.local/share/gnome-shell/extensions/extension-settings.dconf'
 alias dconf-extension-load='dconf load /org/gnome/shell/extensions/ < ~/.local/share/gnome-shell/extensions/extension-settings.dconf'
+alias tmux='tmux attach-session -t main||tmux source-file ~/.tmux/default-session.conf'
 TZ='Asia/Jerusalem'; export TZ
 #powerline-daemon -q
 #. /usr/lib/python3.8/site-packages/powerline/bindings/zsh/powerline.zsh
 bindkey "^[OC" forward-char
 # r.arrow -> forward-char
 # ctrl+r.arrow -> forward-word
+source /usr/share/zsh-theme-powerlevel10k/powerlevel9k.zsh-theme
+
+POW_SRC=~/.p10k.zsh
+if [ $(tput colors) -gt 8 ]; then
+	POW_SRC=~/.p10k.color.zsh
+fi
+# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
+# [[ ! -f $POW_SRC ]] ||
+source $POW_SRC 

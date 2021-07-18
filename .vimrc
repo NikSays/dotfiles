@@ -1,6 +1,7 @@
 so ~/.vim/plugins.vim
 so ~/.vim/coc.vim
-let g:coc_global_extensions = ['coc-go', 'coc-json', 'coc-markdownlint', 'coc-pyright', 'coc-sh', 'coc-tsserver']
+let g:coc_global_extensions = [ 'coc-json', 'coc-markdownlint', 'coc-pyright', 'coc-sh', 'coc-tsserver']
+let g:go_def_mapping_enabled = 0
 set noshowmode
 set number
 set relativenumber
