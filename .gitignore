@@ -31,3 +31,6 @@
 !.p10k.color.zsh/**
 !.p10k.zsh
 !.p10k.zsh/**
+!.config
+!.config/environment.d
+!.config/environment.d/**

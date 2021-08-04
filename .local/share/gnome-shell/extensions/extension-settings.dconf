@@ -34,7 +34,14 @@ unity-backlit-items=false
 style='show-hide'
 
 [ncom/github/hermes83/compiz-alike-windows-effect]
-skip-frames-before-spring-start=8.0
+friction=66.427457226372752
+manual-restore-factor=2.1191709844559585
+maximize-effect-enabled=true
+resize-effect-enabled=false
+skip-frames-before-spring-start=20.0
+spring=13.593264248704662
+x-tiles=3.0
+y-tiles=3.0
 
 [panel-osd]
 test-notification=false
@@ -43,7 +50,6 @@ x-pos=100.0
 [pop-shell]
 pop-monitor-left=@as []
 pop-workspace-down=@as []
-tile-enter=['<Super>Return']
 
 [user-theme]
 name='Matcha-dark-sea'
