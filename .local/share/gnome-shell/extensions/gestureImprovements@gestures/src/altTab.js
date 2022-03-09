@@ -4,11 +4,11 @@ const GLib = imports.gi.GLib;
 const Shell = imports.gi.Shell;
 const St = imports.gi.St;
 
+const Me = imports.misc.extensionUtils.getCurrentExtension();
+const { AltTabConstants, ExtSettings } = Me.imports.constants;
+const { TouchpadSwipeGesture } = Me.imports.src.swipeTracker;
 const Main = imports.ui.main;
 const { WindowSwitcherPopup } = imports.ui.altTab;
-const Me = imports.misc.extensionUtils.getCurrentExtension();
-const { TouchpadSwipeGesture } = Me.imports.src.swipeTracker;
-const { AltTabConstants, ExtSettings } = Me.imports.constants;
 let dummyWinCount = AltTabConstants.DUMMY_WIN_COUNT;
 function getIndexForProgress(progress, nelement) {
 	let index = Math.floor(progress * (nelement + 2 * dummyWinCount));
@@ -21,12 +21,14 @@ function getAvgProgressForIndex(index, nelement) {
 	const progress = (index + 0.5) / (nelement + 2 * dummyWinCount);
 	return progress;
 }
-const AltTabExtState = {
-	DISABLED: 0,
-	DEFAULT: 1,
-	ALTTABDELAY: 2,
-	ALTTAB: 3,
-};
+// declare enum
+var AltTabExtState;
+(function (AltTabExtState) {
+	AltTabExtState[AltTabExtState['DISABLED'] = 0] = 'DISABLED';
+	AltTabExtState[AltTabExtState['DEFAULT'] = 1] = 'DEFAULT';
+	AltTabExtState[AltTabExtState['ALTTABDELAY'] = 2] = 'ALTTABDELAY';
+	AltTabExtState[AltTabExtState['ALTTAB'] = 3] = 'ALTTAB';
+})(AltTabExtState || (AltTabExtState = {}));
 var AltTabGestureExtension = class AltTabGestureExtension {
 	constructor() {
 		this._extState = AltTabExtState.DISABLED;
@@ -79,6 +81,10 @@ var AltTabGestureExtension = class AltTabGestureExtension {
 		this._progress = 0;
 		if (this._extState === AltTabExtState.DEFAULT) {
 			this._switcher = new WindowSwitcherPopup();
+			this._switcher.connect('destroy', () => {
+				this._switcher = undefined;
+				this._reset();
+			});
 			// remove timeout entirely
 			this._switcher._resetNoModsTimeout = function () {
 				if (this._noModsTimeoutId) {
@@ -133,25 +139,24 @@ var AltTabGestureExtension = class AltTabGestureExtension {
 		}
 	}
 	_gestureEnd() {
-		if (this._extState === AltTabExtState.ALTTAB ||
-            this._extState === AltTabExtState.ALTTABDELAY) {
+		if (this._switcher) {
+			const win = this._switcher._items[this._switcher._selectedIndex].window;
+			Main.activateWindow(win);
+			this._switcher.destroy();
+			this._switcher = undefined;
+		}
+		this._reset();
+	}
+	_reset() {
+		if (this._extState > AltTabExtState.DEFAULT) {
 			this._extState = AltTabExtState.DEFAULT;
-			if (this._altTabTimeoutId != 0) {
+			if (this._altTabTimeoutId) {
 				GLib.source_remove(this._altTabTimeoutId);
 				this._altTabTimeoutId = 0;
-			}
-			if (this._switcher) {
-				const win = this._switcher._items[this._switcher._selectedIndex].window;
-				Main.activateWindow(win);
-				this._switcher.destroy();
-				this._switcher = undefined;
 			}
 			this._progress = 0;
 			this._adjustment.value = 0;
 		}
 		this._extState = AltTabExtState.DEFAULT;
-	}
-	get state() {
-		return this._extState;
 	}
 };

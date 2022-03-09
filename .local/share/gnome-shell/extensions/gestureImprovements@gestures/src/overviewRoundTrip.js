@@ -2,20 +2,22 @@
 const Clutter = imports.gi.Clutter;
 const Shell = imports.gi.Shell;
 
+const Me = imports.misc.extensionUtils.getCurrentExtension();
+const { ExtSettings, OverviewControlsState } = Me.imports.constants;
+const { createSwipeTracker } = Me.imports.src.swipeTracker;
 const Main = imports.ui.main;
 const { SwipeTracker } = imports.ui.swipeTracker;
-const Me = imports.misc.extensionUtils.getCurrentExtension();
-const { createSwipeTracker } = Me.imports.src.swipeTracker;
-const { OverviewControlsState, ExtSettings } = Me.imports.constants;
-const ExtensionState = {
-	DISABLED: 0,
-	DEFAULT: 1,
-	CUSTOM: 2,
-};
+// declare enum
+var ExtensionState;
+(function (ExtensionState) {
+	// DISABLED = 0,
+	ExtensionState[ExtensionState['DEFAULT'] = 1] = 'DEFAULT';
+	ExtensionState[ExtensionState['CUSTOM'] = 2] = 'CUSTOM';
+})(ExtensionState || (ExtensionState = {}));
 var OverviewRoundTripGestureExtension = class OverviewRoundTripGestureExtension {
 	constructor() {
 		this._progress = 0;
-		this._extensionState = ExtensionState.DISABLED;
+		this._extensionState = ExtensionState.DEFAULT;
 		this._shownEventId = 0;
 		this._hiddenEventId = 0;
 		this._overviewControls = Main.overview._overview._controls;
@@ -59,7 +61,6 @@ var OverviewRoundTripGestureExtension = class OverviewRoundTripGestureExtension 
 		this._hiddenEventId = Main.overview.connect('hidden', () => this._extensionState = ExtensionState.DEFAULT);
 	}
 	destroy() {
-		this._extensionState = ExtensionState.DISABLED;
 		if (this._swipeTracker) {
 			this._connectors.forEach(connector => { var _a; return (_a = this._swipeTracker) === null || _a === void 0 ? void 0 : _a.disconnect(connector); });
 			this._swipeTracker.destroy();

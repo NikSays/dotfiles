@@ -9,16 +9,14 @@
 /* exported PanelButton */
 
 const Lib = imports.misc.extensionUtils.getCurrentExtension().imports.lib;
-const GObject = imports.gi.GObject;
+const { GObject, St } = imports.gi;
 const PanelMenu = imports.ui.panelMenu;
-const St = imports.gi.St;
+const Volume = imports.ui.status.volume;
 
-const { Menu } = Lib.menu.menu;
-const { PercentageLabel } = Lib.widget.percentageLabel;
-
+const { Indicator } = Lib.menu.indicator;
 
 /**
- * Stand-alone panel menu
+ * Stand-alone panel menu button.
  */
 var PanelButton = GObject.registerClass(class PanelButton extends PanelMenu.Button
 {
@@ -28,49 +26,18 @@ var PanelButton = GObject.registerClass(class PanelButton extends PanelMenu.Butt
      * @private
      */
     _init(mixer, options = {}) {
-        super._init(0.0, 'ShellVolumeMixer');
+        super._init(0.0, 'ShellVolumeMixer', false);
 
-        this._mixerMenu = new Menu(mixer, {
-            separator: true
+        this._indicators = new St.BoxLayout({ style_class: 'panel-status-indicators-box' });
+        this.add_child(this._indicators);
+
+        this._volume = new Indicator(mixer, {
+            ...options,
+            separator: true,
+            menuClass: 'svm-standalone-menu',
         });
 
-        this._mixerMenu.actor.add_style_class_name('svm-standalone-menu');
-
-        this._box = new St.BoxLayout();
-
-        this._icon = new St.Icon({ style_class: 'system-status-icon' });
-        this._bin = new St.Bin({ child: this._icon });
-
-        this._box.add(this._bin);
-
-        this.add_actor(this._box);
-
-        this._iconChangedId = this._mixerMenu.connect('output-icon-changed', this._onIconChanged.bind(this));
-
-        if (options.showPercentageLabel) {
-            this._percentageLabel = new PercentageLabel(mixer);
-            this._box.add(this._percentageLabel);
-        }
-
-        this.menu.addMenuItem(this._mixerMenu);
-
-        this._onIconChanged();
-    }
-
-    _onIconChanged() {
-        this.setIcon(this._mixerMenu.getOutputIcon());
-    }
-
-    setIcon(icon_name) {
-        this._icon.icon_name = icon_name;
-    }
-
-    _onDestroy() {
-        super._onDestroy();
-
-        if (this._iconChangedId) {
-            this._mixerMenu.disconnect(this._iconChangedId);
-            delete this._iconChangedId;
-        }
+        this._indicators.add_child(this._volume);
+        this.menu.addMenuItem(this._volume.menu);
     }
 });

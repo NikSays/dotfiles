@@ -3,26 +3,19 @@
  *
  * Advanced mixer extension.
  *
- * @author Harry Karvonen <harry.karvonen@gmail.com>
  * @author Alexander Hofbauer <alex@derhofbauer.at>
  */
 
-/* exported init, enable, disable */
+/* exported init */
 
-const Lib = imports.misc.extensionUtils.getCurrentExtension().imports.lib;
+const ExtensionUtils = imports.misc.extensionUtils;
+const Lib = ExtensionUtils.getCurrentExtension().imports.lib;
 
 const { Extension } = Lib.main;
 
-let extension;
 
 function init() {
-    extension = new Extension();
-}
+    ExtensionUtils.initTranslations();
 
-function enable() {
-    extension.enable();
-}
-
-function disable() {
-    extension.disable();
+    return new Extension();
 }

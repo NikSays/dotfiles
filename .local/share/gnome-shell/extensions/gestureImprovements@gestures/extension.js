@@ -1,22 +1,26 @@
 /* exported init */
 const GLib = imports.gi.GLib;
+
 const Me = imports.misc.extensionUtils.getCurrentExtension();
+const { PinchGestureType } = Me.imports.common.settings;
 const Constants = Me.imports.constants;
-const { GestureExtension } = Me.imports.src.gestures;
+const { AltTabConstants, ExtSettings, TouchpadConstants } = Me.imports.constants;
 const { AltTabGestureExtension } = Me.imports.src.altTab;
+const { GestureExtension } = Me.imports.src.gestures;
 const { OverviewRoundTripGestureExtension } = Me.imports.src.overviewRoundTrip;
+const { ShowDesktopExtension } = Me.imports.src.pinchGestures.showDesktop;
 const { SnapWindowExtension } = Me.imports.src.snapWindow;
 const DBusUtils = Me.imports.src.utils.dbus;
-
 const ExtensionUtils = imports.misc.extensionUtils;
 class Extension {
 	constructor() {
 		this._settingChangedId = 0;
 		this._reloadWaitId = 0;
 		this._extensions = [];
-		this._noReloadDelayFor = [
-			'default-session-workspace',
-			'default-overview',
+		this._addReloadDelayFor = [
+			'touchpad-speed-scale',
+			'alttab-delay',
+			'touchpad-pinch-speed',
 		];
 	}
 	enable() {
@@ -40,7 +44,7 @@ class Extension {
 			GLib.source_remove(this._reloadWaitId);
 			this._reloadWaitId = 0;
 		}
-		this._reloadWaitId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, (this._noReloadDelayFor.includes(key) ? 0 : Constants.RELOAD_DELAY), () => {
+		this._reloadWaitId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, (this._addReloadDelayFor.includes(key) ? Constants.RELOAD_DELAY : 0), () => {
 			this._disable();
 			this._enable();
 			this._reloadWaitId = 0;
@@ -49,12 +53,21 @@ class Extension {
 	}
 	_enable() {
 		this._initializeSettings();
-		this._extensions = [
-			new AltTabGestureExtension(),
-			new OverviewRoundTripGestureExtension(),
-			new GestureExtension(),
-			new SnapWindowExtension(),
-		];
+		this._extensions = [];
+		if (this.settings === undefined)
+			return;
+		if (this.settings.get_boolean('enable-alttab-gesture'))
+			this._extensions.push(new AltTabGestureExtension());
+		this._extensions.push(new OverviewRoundTripGestureExtension(), new GestureExtension());
+		if (this.settings.get_boolean('enable-window-manipulation-gesture'))
+			this._extensions.push(new SnapWindowExtension());
+		// pinch to show desktop
+		const showDesktopFingers = [
+			this.settings.get_enum('pinch-3-finger-gesture') === PinchGestureType.SHOW_DESKTOP ? 3 : undefined,
+			this.settings.get_enum('pinch-4-finger-gesture') === PinchGestureType.SHOW_DESKTOP ? 4 : undefined,
+		].filter((f) => typeof f === 'number');
+		if (showDesktopFingers.length)
+			this._extensions.push(new ShowDesktopExtension(showDesktopFingers));
 		this._extensions.forEach(extension => extension.apply());
 	}
 	_disable() {
@@ -64,10 +77,13 @@ class Extension {
 	}
 	_initializeSettings() {
 		if (this.settings) {
-			Constants.ExtSettings.DEFAULT_SESSION_WORKSPACE_GESTURE = this.settings.get_boolean('default-session-workspace');
-			Constants.ExtSettings.DEFAULT_OVERVIEW_GESTURE = this.settings.get_boolean('default-overview');
-			Constants.TouchpadConstants.SWIPE_MULTIPLIER = Constants.TouchpadConstants.DEFAULT_SWIPE_MULTIPLIER * this.settings.get_double('touchpad-speed-scale');
-			Constants.AltTabConstants.DELAY_DURATION = this.settings.get_int('alttab-delay');
+			ExtSettings.DEFAULT_SESSION_WORKSPACE_GESTURE = this.settings.get_boolean('default-session-workspace');
+			ExtSettings.DEFAULT_OVERVIEW_GESTURE = this.settings.get_boolean('default-overview');
+			ExtSettings.ALLOW_MINIMIZE_WINDOW = this.settings.get_boolean('allow-minimize-window');
+			ExtSettings.FOLLOW_NATURAL_SCROLL = this.settings.get_boolean('follow-natural-scroll');
+			TouchpadConstants.SWIPE_MULTIPLIER = Constants.TouchpadConstants.DEFAULT_SWIPE_MULTIPLIER * this.settings.get_double('touchpad-speed-scale');
+			TouchpadConstants.PINCH_MULTIPLIER = Constants.TouchpadConstants.DEFAULT_PINCH_MULTIPLIER * this.settings.get_double('touchpad-pinch-speed');
+			AltTabConstants.DELAY_DURATION = this.settings.get_int('alttab-delay');
 		}
 	}
 }

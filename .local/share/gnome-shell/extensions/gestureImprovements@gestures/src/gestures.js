@@ -1,12 +1,12 @@
 /* exported GestureExtension */
+const Clutter = imports.gi.Clutter;
 const GObject = imports.gi.GObject;
 const Shell = imports.gi.Shell;
-const Clutter = imports.gi.Clutter;
 
-const Main = imports.ui.main;
 const Me = imports.misc.extensionUtils.getCurrentExtension();
+const { ExtSettings, OverviewControlsState } = Me.imports.constants;
 const { createSwipeTracker, TouchpadSwipeGesture } = Me.imports.src.swipeTracker;
-const { OverviewControlsState, ExtSettings } = Me.imports.constants;
+const Main = imports.ui.main;
 class SwipeTrackerEndPointsModifer {
 	constructor() {
 		this._firstVal = 0;
@@ -39,7 +39,7 @@ class WorkspaceAnimationModifier extends SwipeTrackerEndPointsModifer {
 	constructor(wm) {
 		super();
 		this._workspaceAnimation = wm._workspaceAnimation;
-		this._swipeTracker = createSwipeTracker(global.stage, (ExtSettings.DEFAULT_SESSION_WORKSPACE_GESTURE ? [3] : [4]), Shell.ActionMode.NORMAL, Clutter.Orientation.HORIZONTAL, 1 / 1.5);
+		this._swipeTracker = createSwipeTracker(global.stage, (ExtSettings.DEFAULT_SESSION_WORKSPACE_GESTURE ? [3] : [4]), Shell.ActionMode.NORMAL, Clutter.Orientation.HORIZONTAL, ExtSettings.FOLLOW_NATURAL_SCROLL, 1, { allowTouch: false });
 	}
 	apply() {
 		if (this._workspaceAnimation._swipeTracker._touchpadGesture) {
@@ -68,12 +68,12 @@ class WorkspaceAnimationModifier extends SwipeTrackerEndPointsModifer {
 		this._workspaceAnimation._switchWorkspaceEnd(tracker, duration, progress);
 	}
 	destroy() {
-		super.destroy();
 		this._swipeTracker.destroy();
 		const swipeTracker = this._workspaceAnimation._swipeTracker;
 		if (swipeTracker._touchpadGesture) {
 			swipeTracker._touchpadGesture._stageCaptureEvent = global.stage.connect('captured-event::touchpad', swipeTracker._touchpadGesture._handleEvent.bind(swipeTracker._touchpadGesture));
 		}
+		super.destroy();
 	}
 }
 var GestureExtension = class GestureExtension {
@@ -84,9 +84,9 @@ var GestureExtension = class GestureExtension {
 				swipeTracker: Main.overview._overview._controls._workspacesDisplay._swipeTracker,
 				nfingers: [3, 4],
 				disableOldGesture: true,
-				followNaturalScroll: true,
+				followNaturalScroll: ExtSettings.FOLLOW_NATURAL_SCROLL,
 				modes: Shell.ActionMode.OVERVIEW,
-				gestureSpeed: 1 / 1.5,
+				gestureSpeed: 1,
 				checkAllowedGesture: (event) => {
 					if (Main.overview._overview._controls._searchController.searchActive) {
 						return false;
@@ -103,7 +103,7 @@ var GestureExtension = class GestureExtension {
 				swipeTracker: Main.overview._overview._controls._appDisplay._swipeTracker,
 				nfingers: [3],
 				disableOldGesture: true,
-				followNaturalScroll: true,
+				followNaturalScroll: ExtSettings.FOLLOW_NATURAL_SCROLL,
 				modes: Shell.ActionMode.OVERVIEW,
 				checkAllowedGesture: () => {
 					if (Main.overview._overview._controls._searchController.searchActive) {

@@ -27,6 +27,12 @@ const {
 } = Lib.widget.volume;
 
 
+const VolumeType = {
+    OUTPUT: 0,
+    INPUT: 1,
+};
+
+
 /**
  * Extension of Volume.VolumeMenu without its constructor().
  */
@@ -128,6 +134,13 @@ var Menu = class extends VolumeMenuExtension
             symbolicIcons: this.options.symbolicIcons
         });
 
+        this._input.item.connect('notify::visible', () => {
+            this.emit('input-visible-changed');
+        });
+        this._input.connect('stream-updated', () => {
+            this.emit('input-icon-changed');
+        });
+
 
         this.addMenuItem(this._output.item, 0);
         this.addMenuItem(this._inputMenu.item, 2);
@@ -163,18 +176,6 @@ var Menu = class extends VolumeMenuExtension
         super.close(animate);
     }
 
-    getOutputIcon() {
-        if (this._output._hasHeadphones) {
-            return 'audio-headphones-symbolic';
-        } else {
-            return this._output.getIcon();
-        }
-    }
-
-    getInputIcon() {
-        return this._input.getIcon();
-    }
-
     _addSeparator() {
         if (this._separator) {
             this._separator.destroy();
@@ -185,6 +186,12 @@ var Menu = class extends VolumeMenuExtension
     }
 
     _addStream(control, stream) {
+        if (stream instanceof Gvc.MixerSource
+            || stream instanceof Gvc.MixerSourceOutput
+        ) {
+            return;
+        }
+
         const isSystemSound = stream instanceof Gvc.MixerEventRole;
         const isInputStream = stream instanceof Gvc.MixerSinkInput;
         const isOutputStream = stream instanceof Gvc.MixerSink;
@@ -221,7 +228,7 @@ var Menu = class extends VolumeMenuExtension
             this._addOutputStream(stream, control, options);
 
         } else {
-            Log.info(`Unhandled stream ${stream.id} (${stream.name})`);
+            Log.info(`Unhandled stream ${stream.id} (${stream.name} (${stream.constructor.name}))`);
         }
     }
 
@@ -373,5 +380,9 @@ var Menu = class extends VolumeMenuExtension
         }
 
         callback(dump.join('\n'));
+    }
+
+    getInputVisible() {
+        return this._input.isVisible();
     }
 };

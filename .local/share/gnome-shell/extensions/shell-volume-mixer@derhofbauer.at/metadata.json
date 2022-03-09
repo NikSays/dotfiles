@@ -5,9 +5,9 @@
   "name": "Volume Mixer",
   "settings-schema": "org.gnome.shell.extensions.shell-volume-mixer",
   "shell-version": [
-    "40"
+    "41"
   ],
   "url": "https://github.com/aleho/gnome-shell-volume-mixer",
   "uuid": "shell-volume-mixer@derhofbauer.at",
-  "version": 40
+  "version": 44
 }

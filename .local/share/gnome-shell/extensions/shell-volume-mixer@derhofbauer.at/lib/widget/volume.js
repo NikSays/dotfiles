@@ -10,12 +10,11 @@
 
 const { Clutter, GLib, St } = imports.gi;
 const ExtensionUtils = imports.misc.extensionUtils;
-const Lib = imports.misc.extensionUtils.getCurrentExtension().imports.lib;
+const Lib = ExtensionUtils.getCurrentExtension().imports.lib;
 const Main = imports.ui.main;
 const PopupMenu = imports.ui.popupMenu;
 const Volume = imports.ui.status.volume;
-
-const __ = Lib.utils.gettext._;
+const __ = ExtensionUtils.gettext;
 
 const { EventBroker } = Lib.utils.eventBroker;
 const { FloatingLabel } = Lib.widget.floatingLabel;
@@ -55,6 +54,9 @@ const StreamSlider = class extends OutputStreamSliderExtension
      */
     constructor(control, options = {}) {
         super();
+
+        this._isDestroyed = false;
+        this._hasHeadphones = false;
 
         this.options = options;
         this._control = control;
@@ -154,9 +156,11 @@ const StreamSlider = class extends OutputStreamSliderExtension
 
     _onButtonPress(actor, event) {
         if (event.get_button() === 2) {
-            this._stream.change_is_muted(!this._stream.is_muted);
+            this.toggleMute();
+
             return Clutter.EVENT_STOP;
         }
+
         return this._slider.startDragging(event);
     }
 
@@ -230,7 +234,15 @@ const StreamSlider = class extends OutputStreamSliderExtension
         this._volumeInfo.hide(false);
     }
 
+    toggleMute() {
+        if (this._stream) {
+            this._stream.change_is_muted(!this._stream.is_muted);
+        }
+    }
+
     _onDestroy() {
+        this._isDestroyed = true;
+
         // make sure we clean up all bindings
         if (this._stream) {
             this._disconnectStream(this._stream);
@@ -249,7 +261,6 @@ var MasterSlider = class extends StreamSlider
         this.item = new MenuItem.MasterMenuItem();
         this.item.menu.actor.add_style_class_name('svm-master-slider-menu');
 
-        this._hasHeadphones = false;
         this._slider = this.item._slider;
         this._icon = this.item.icon;
         this._label = this.item.label;
@@ -281,8 +292,9 @@ var MasterSlider = class extends StreamSlider
      */
     _onButtonPress(actor, event) {
         if (event.get_button() === 2) {
-            this._stream.change_is_muted(!this._stream.is_muted);
+            this.toggleMute();
         }
+
         return Clutter.EVENT_STOP;
     }
 
@@ -291,11 +303,13 @@ var MasterSlider = class extends StreamSlider
     }
 
     scroll(event) {
-        super.scroll(event);
+        const eventResult = super.scroll(event);
 
         if (Main.panel.statusArea.aggregateMenu.menu.isOpen) {
             this._showVolumeInfo();
         }
+
+        return eventResult;
     }
 };
 
@@ -417,7 +431,12 @@ var OutputSlider = class extends StreamSlider
             // check if port is available before setting visible
             (async () => {
                 try {
-                    const byPort = await this._shouldByVisibleByPort(forceRefresh);
+                    const byPort = await this._shouldBeVisibleByPort(forceRefresh);
+
+                    if (this._isDestroyed) {
+                        // async race condition, we're already gone
+                        return;
+                    }
 
                     // This could be a race condition with the async code finishing after current conditions have changed.
                     // Therefore we have to check the sync path again.
@@ -444,13 +463,13 @@ var OutputSlider = class extends StreamSlider
      * @returns {Promise<boolean>}
      * @private
      */
-    async _shouldByVisibleByPort(forceRefresh = true) {
+    async _shouldBeVisibleByPort(forceRefresh = true) {
         if (!this._stream || ! this._cards) {
             return true;
         }
 
         if (!this._stream.card_index) {
-            Log.error('OutputSlider', '_shouldByVisibleByPort', 'Stream cannot be identified, no card index available');
+            Log.error('OutputSlider', '_shouldBeVisibleByPort', 'Stream cannot be identified, no card index available');
             return true;
         }
 
@@ -464,7 +483,7 @@ var OutputSlider = class extends StreamSlider
         const port = this._stream.port in card.ports ? card.ports[this._stream.port] : null;
 
         if (!port) {
-            Log.error('OutputSlider', '_shouldByVisibleByPort', `Port ${this._stream.port} not found for stream ${this._stream.id}:${this._stream.name}`);
+            Log.error('OutputSlider', '_shouldBeVisibleByPort', `Port ${this._stream.port} not found for stream ${this._stream.id}:${this._stream.name}`);
             return true;
         }
 
@@ -541,6 +560,7 @@ var InputStreamSlider = class extends StreamSlider
         this._streamAddedId = this._control.connect('stream-added', this._maybeShowInput.bind(this));
         this._streamRemovedId = this._control.connect('stream-removed', this._maybeShowInput.bind(this));
 
+        this._icon.icon_name = 'audio-input-microphone-symbolic';
         this._icons = [
             'microphone-sensitivity-muted-symbolic',
             'microphone-sensitivity-low-symbolic',
@@ -550,8 +570,8 @@ var InputStreamSlider = class extends StreamSlider
     }
 
     _connectStream(stream) {
-        super._connectStream(stream);
-        this._maybeShowInput();
+        Volume.InputStreamSlider.prototype._connectStream.apply(this, [stream]);
+        this.refresh();
     }
 
     _maybeShowInput() {
@@ -564,17 +584,15 @@ var InputStreamSlider = class extends StreamSlider
         }
     }
 
-    isVisible() {
-        return this._shouldBeVisible();
-    }
-
     _shouldBeVisible() {
         return Volume.InputStreamSlider.prototype._shouldBeVisible.call(this);
     }
 
-    _updateLabel() {
-        super._updateLabel();
+    isVisible() {
+        return this._shouldBeVisible();
+    }
 
+    _updateLabel() {
         this._label.text = _('Microphone');
     }
 

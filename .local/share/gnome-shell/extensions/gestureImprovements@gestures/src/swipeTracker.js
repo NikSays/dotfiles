@@ -1,14 +1,15 @@
 /* exported TouchpadSwipeGesture, createSwipeTracker */
 const Clutter = imports.gi.Clutter;
 const GObject = imports.gi.GObject;
-const Shell = imports.gi.Shell;
 const Meta = imports.gi.Meta;
+const Shell = imports.gi.Shell;
 
+const Me = imports.misc.extensionUtils.getCurrentExtension();
+const { registerClass } = Me.imports.common.utils.gobject;
+const { TouchpadConstants } = Me.imports.constants;
+const DBusUtils = Me.imports.src.utils.dbus;
 const Main = imports.ui.main;
 const { SwipeTracker } = imports.ui.swipeTracker;
-const Me = imports.misc.extensionUtils.getCurrentExtension();
-const DBusUtils = Me.imports.src.utils.dbus;
-const { TouchpadConstants } = Me.imports.constants;
 // define enum
 var TouchpadState;
 (function (TouchpadState) {
@@ -17,7 +18,7 @@ var TouchpadState;
 	TouchpadState[TouchpadState['HANDLING'] = 2] = 'HANDLING';
 	TouchpadState[TouchpadState['IGNORED'] = 3] = 'IGNORED';
 })(TouchpadState || (TouchpadState = {}));
-var TouchpadSwipeGesture = GObject.registerClass({
+var TouchpadSwipeGesture = registerClass({
 	Properties: {
 		'enabled': GObject.ParamSpec.boolean('enabled', 'enabled', 'enabled', GObject.ParamFlags.READWRITE, true),
 		'orientation': GObject.ParamSpec.enum('orientation', 'orientation', 'orientation', GObject.ParamFlags.READWRITE, Clutter.Orientation, Clutter.Orientation.HORIZONTAL),
@@ -28,7 +29,7 @@ var TouchpadSwipeGesture = GObject.registerClass({
 		'end': { param_types: [GObject.TYPE_UINT, GObject.TYPE_DOUBLE] },
 	},
 }, class TouchpadSwipeGesture extends GObject.Object {
-	_init(nfingers, allowedModes, orientation, followNaturalScroll = true, checkAllowedGesture = undefined, gestureSpeed = 1.0) {
+	_init(nfingers, allowedModes, orientation, followNaturalScroll = true, checkAllowedGesture, gestureSpeed = 1.0) {
 		super._init();
 		this._cumulativeX = 0;
 		this._cumulativeY = 0;
@@ -153,16 +154,27 @@ var TouchpadSwipeGesture = GObject.registerClass({
 		}
 	}
 });
-function createSwipeTracker(actor, nfingers, allowedModes, orientation, gestureSpeed = 1) {
+function createSwipeTracker(actor, nfingers, allowedModes, orientation, followNaturalScroll = true, gestureSpeed = 1, params) {
+	var _a, _b, _c;
+	params = params !== null && params !== void 0 ? params : {};
+	params.allowDrag = (_a = params.allowDrag) !== null && _a !== void 0 ? _a : false;
+	params.allowScroll = (_b = params.allowScroll) !== null && _b !== void 0 ? _b : false;
+	const allowTouch = (_c = params.allowTouch) !== null && _c !== void 0 ? _c : true;
+	delete params.allowTouch;
 	// create swipeTracker
-	const swipeTracker = new SwipeTracker(actor, orientation, allowedModes, { allowDrag: false, allowScroll: false });
+	const swipeTracker = new SwipeTracker(actor, orientation, allowedModes, params);
+	// remove touch gestures
+	if (!allowTouch && swipeTracker._touchGesture) {
+		global.stage.remove_action(swipeTracker._touchGesture);
+		delete swipeTracker._touchGesture;
+	}
 	// remove old touchpad gesture from swipeTracker
 	if (swipeTracker._touchpadGesture) {
 		swipeTracker._touchpadGesture.destroy();
 		swipeTracker._touchpadGesture = undefined;
 	}
 	// add touchpadBindings to tracker
-	swipeTracker._touchpadGesture = new TouchpadSwipeGesture(nfingers, swipeTracker._allowedModes, swipeTracker.orientation, true, undefined, gestureSpeed);
+	swipeTracker._touchpadGesture = new TouchpadSwipeGesture(nfingers, swipeTracker._allowedModes, swipeTracker.orientation, followNaturalScroll, undefined, gestureSpeed);
 	swipeTracker._touchpadGesture.connect('begin', swipeTracker._beginGesture.bind(swipeTracker));
 	swipeTracker._touchpadGesture.connect('update', swipeTracker._updateGesture.bind(swipeTracker));
 	swipeTracker._touchpadGesture.connect('end', swipeTracker._endTouchpadGesture.bind(swipeTracker));

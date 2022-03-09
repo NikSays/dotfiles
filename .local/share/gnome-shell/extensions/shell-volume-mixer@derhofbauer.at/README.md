@@ -1,12 +1,15 @@
 GNOME Shell Volume Mixer
 ========================
 
+[![Linting](https://github.com/aleho/gnome-shell-volume-mixer/actions/workflows/linting.yml/badge.svg)](https://github.com/aleho/gnome-shell-volume-mixer/actions/workflows/linting.yml)
 
 Shell Volume Mixer is an extension for GNOME Shell allowing separate
 configuration of PulseAudio devices and output switches. It features a profile
 switcher to quickly switch between pinned profiles and devices.
 
-Middle mouse click on a slider mutes the selected stream.
+Middle mouse click on an indicator or a slider mutes the selected stream.
+
+Indicators and streams are also scrollable,
 
 
 <img src="/screenshot_1.png" alt="Outputs menu" width="40%"><img alt="Inputs menu" src="/screenshot_2.png" width="40%">
@@ -54,6 +57,6 @@ button to switch to a 2% step.
 Acknowledgments
 ---------------
 
-This is a fork of AdvancedVolumeMixer by Harry Karvonen
+This is a fork of AdvancedVolumeMixer by [Harry Karvonen](https://github.com/Hatell)
 (git://repo.or.cz/AdvancedVolumeMixer.git).
 Many thanks go out to him for his initial work.

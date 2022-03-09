@@ -5,10 +5,10 @@
   "name": "Caffeine",
   "settings-schema": "org.gnome.shell.extensions.caffeine",
   "shell-version": [
-    "40.0",
-    "40.1"
+    "40",
+    "41"
   ],
   "url": "https://github.com/eonpatapon/gnome-shell-extension-caffeine",
   "uuid": "caffeine@patapon.info",
-  "version": 39
+  "version": 40
 }

@@ -1,35 +1,27 @@
 /* exported SnapWindowExtension */
-const Shell = imports.gi.Shell;
-const Meta = imports.gi.Meta;
-const St = imports.gi.St;
-const GObject = imports.gi.GObject;
-const GLib = imports.gi.GLib;
 const Clutter = imports.gi.Clutter;
+const Meta = imports.gi.Meta;
+const Shell = imports.gi.Shell;
+const St = imports.gi.St;
 
+const Me = imports.misc.extensionUtils.getCurrentExtension();
+const { registerClass } = Me.imports.common.utils.gobject;
+const { ExtSettings } = Me.imports.constants;
+const { createSwipeTracker } = Me.imports.src.swipeTracker;
+const { easeActor, easeAdjustment } = Me.imports.src.utils.environment;
 const Main = imports.ui.main;
 const Utils = imports.misc.util;
-const Me = imports.misc.extensionUtils.getCurrentExtension();
-const { createSwipeTracker } = Me.imports.src.swipeTracker;
-const { ExtSettings } = Me.imports.constants;
-const { WMsizeChangedWindow } = Me.imports.src.patches.windowManager;
-const { block_signal_by_name } = Me.imports.src.utils.gobjectSignal;
 const { SwipeTracker } = imports.ui.swipeTracker;
 const WINDOW_ANIMATION_TIME = 250;
 const UPDATED_WINDOW_ANIMATION_TIME = 150;
-const SNAPCHANGE_ANIMATION_TIME = 100;
-const TRIGGER_GESTURE_DELAY = 150;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function easeActor(actor, value, params) {
-	if (value !== undefined)
-		actor.ease(value, params);
-	else
-		actor.ease(params);
-}
+const TRIGGER_THRESHOLD = 0.1;
 // define enum
 var GestureMaxUnMaxState;
 (function (GestureMaxUnMaxState) {
+	GestureMaxUnMaxState[GestureMaxUnMaxState['MINIMIZE'] = -1] = 'MINIMIZE';
 	GestureMaxUnMaxState[GestureMaxUnMaxState['UNMAXIMIZE'] = 0] = 'UNMAXIMIZE';
 	GestureMaxUnMaxState[GestureMaxUnMaxState['MAXIMIZE'] = 1] = 'MAXIMIZE';
+	GestureMaxUnMaxState[GestureMaxUnMaxState['FULLSCREEN'] = 2] = 'FULLSCREEN';
 })(GestureMaxUnMaxState || (GestureMaxUnMaxState = {}));
 // define enum
 var GestureTileState;
@@ -38,7 +30,7 @@ var GestureTileState;
 	GestureTileState[GestureTileState['NORMAL'] = 0] = 'NORMAL';
 	GestureTileState[GestureTileState['LEFT_TILE'] = 1] = 'LEFT_TILE';
 })(GestureTileState || (GestureTileState = {}));
-const TilePreview = GObject.registerClass(class TilePreview extends St.Widget {
+const TilePreview = registerClass(class TilePreview extends St.Widget {
 	_init() {
 		super._init({
 			reactive: false,
@@ -52,7 +44,7 @@ const TilePreview = GObject.registerClass(class TilePreview extends St.Widget {
 			actor: this,
 			value: 0,
 			lower: -1,
-			upper: 1,
+			upper: 2,
 		});
 		this._adjustment.connect('notify::value', this._valueChanged.bind(this));
 		const seat = Clutter.get_default_backend().get_default_seat();
@@ -62,50 +54,22 @@ const TilePreview = GObject.registerClass(class TilePreview extends St.Widget {
 		if (this.visible) {
 			return false;
 		}
-		const currentMonitor = window.get_monitor();
-		const monitorGeometry = global.display.get_monitor_geometry(currentMonitor);
-		const frame_rect = window.get_frame_rect();
-		let [width, height] = [0, 0];
-		if (currentProgress === GestureMaxUnMaxState.MAXIMIZE) {
-			[width, height] = [frame_rect.width * 0.05, frame_rect.height * 0.05];
-		}
 		this._window = window;
-		this._normalBox = new Meta.Rectangle({
-			x: frame_rect.x + width,
-			y: frame_rect.y + height,
-			width: frame_rect.width - width * 2,
-			height: frame_rect.height - height * 2,
-		});
-		const panelBoxRely = Main.layoutManager.panelBox.y - Main.layoutManager.primaryMonitor.y;
-		const panelHeight = Main.panel.visible &&
-            window.is_on_primary_monitor() &&
-            panelBoxRely <= 0 ?
-			Math.clamp(panelBoxRely + Main.panel.height, 0, Main.panel.height) :
-			0;
-		this._maximizeBox = new Meta.Rectangle({
-			x: monitorGeometry.x,
-			y: monitorGeometry.y + panelHeight,
-			width: monitorGeometry.width,
-			height: monitorGeometry.height - panelHeight,
-		});
-		this._leftSnapBox = new Meta.Rectangle({
-			x: monitorGeometry.x,
-			y: monitorGeometry.y + panelHeight,
-			width: monitorGeometry.width / 2,
-			height: monitorGeometry.height - panelHeight,
-		});
-		this._rightSnapBox = new Meta.Rectangle({
-			x: monitorGeometry.x + monitorGeometry.width / 2,
-			y: monitorGeometry.y + panelHeight,
-			width: monitorGeometry.width / 2,
-			height: monitorGeometry.height - panelHeight,
-		});
+		this._fullscreenBox = global.display.get_monitor_geometry(window.get_monitor());
+		this._maximizeBox = this.getMaximizedBox(window);
+		this._normalBox = this.getNormalBox(window);
+		this._leftSnapBox = this._maximizeBox.copy();
+		this._rightSnapBox = this._maximizeBox.copy();
+		this._minimizeBox = this.getMinimizedBox(this._window, this._maximizeBox);
+		this._leftSnapBox.width /= 2;
+		this._rightSnapBox.width /= 2;
+		this._rightSnapBox.x += this._rightSnapBox.width;
 		this._direction = Clutter.Orientation.VERTICAL;
+		this.opacity = 0;
 		this._adjustment.value = currentProgress;
 		this._valueChanged();
-		this.opacity = 0;
-		this.easeOpacity(255);
 		this.visible = true;
+		this.easeOpacity(255);
 		return true;
 	}
 	finish(duration, state) {
@@ -115,18 +79,29 @@ const TilePreview = GObject.registerClass(class TilePreview extends St.Widget {
 			this.easeOpacity(0, () => this.visible = false);
 			if (this._window) {
 				// maximize-unmaximize
-				this._window.raise();
 				if (this._direction === Clutter.Orientation.VERTICAL) {
 					// Main.wm.skipNextEffect(this._window.get_compositor_private() as Meta.WindowActor);
 					const stSettings = St.Settings.get();
 					// speedup animations
 					const prevSlowdown = stSettings.slow_down_factor;
 					stSettings.slow_down_factor = UPDATED_WINDOW_ANIMATION_TIME / WINDOW_ANIMATION_TIME;
-					if (state === GestureMaxUnMaxState.MAXIMIZE) {
-						this._window.maximize(Meta.MaximizeFlags.BOTH);
-					}
-					else {
-						this._window.unmaximize(Meta.MaximizeFlags.BOTH);
+					switch (state) {
+						case GestureMaxUnMaxState.MINIMIZE:
+							this._window.minimize();
+							break;
+						case GestureMaxUnMaxState.UNMAXIMIZE:
+							if (this._window.is_fullscreen())
+								this._window.unmake_fullscreen();
+							this._window.unmaximize(Meta.MaximizeFlags.BOTH);
+							break;
+						case GestureMaxUnMaxState.MAXIMIZE:
+							if (this._window.is_fullscreen())
+								this._window.unmake_fullscreen();
+							this._window.maximize(Meta.MaximizeFlags.BOTH);
+							break;
+						case GestureMaxUnMaxState.FULLSCREEN:
+							this._window.make_fullscreen();
+							break;
 					}
 					stSettings.slow_down_factor = prevSlowdown;
 				}
@@ -143,23 +118,37 @@ const TilePreview = GObject.registerClass(class TilePreview extends St.Widget {
 			this._window = undefined;
 			this._normalBox = undefined;
 			this._maximizeBox = undefined;
+			this._minimizeBox = undefined;
 			this._leftSnapBox = undefined;
 			this._rightSnapBox = undefined;
 			this._direction = Clutter.Orientation.VERTICAL;
 		};
-		easeActor(this._adjustment, state, {
+		easeAdjustment(this._adjustment, state, {
 			duration: duration,
-			mode: Clutter.AnimationMode.EASE_OUT_CIRC,
+			mode: Clutter.AnimationMode.EASE_OUT_QUAD,
 			onStopped: callback,
 		});
 	}
 	_valueChanged() {
 		let progress = this._adjustment.value;
-		// log(`progress: ${progress}`);
 		let startBox, endBox;
 		if (this._direction === Clutter.Orientation.VERTICAL) {
-			startBox = this._normalBox;
-			endBox = this._maximizeBox;
+			if (progress < GestureMaxUnMaxState.UNMAXIMIZE) {
+				startBox = this._minimizeBox;
+				endBox = this._normalBox;
+				progress -= GestureMaxUnMaxState.MINIMIZE;
+			}
+			else if (progress <= GestureMaxUnMaxState.MAXIMIZE) {
+				// no particular reason for equality here
+				startBox = this._normalBox;
+				endBox = this._maximizeBox;
+				progress -= GestureMaxUnMaxState.UNMAXIMIZE;
+			}
+			else {
+				startBox = this._maximizeBox;
+				endBox = this._fullscreenBox;
+				progress -= GestureMaxUnMaxState.MAXIMIZE;
+			}
 		}
 		else {
 			startBox = this._normalBox;
@@ -184,31 +173,17 @@ const TilePreview = GObject.registerClass(class TilePreview extends St.Widget {
 		];
 		this.set_position(x, y);
 		this.set_size(width, height);
-		// this.opacity = Math.round(25 + 230 * progress);
-		// log(`value changed: ${this.get_position()}, ${this.get_size()}`);
 	}
 	_onDestroy() {
 		this._adjustment.run_dispose();
 	}
-	switchToSnapping() {
+	switchToSnapping(value) {
 		this._adjustment.remove_transition('value');
-		this._adjustment.value = 0;
-		let toValue = -0.05;
-		if (this._maximizeBox && this._normalBox) {
-			toValue = -18 / Math.max(18, this._maximizeBox.width - this._normalBox.width);
-		}
-		easeActor(this._adjustment, toValue, {
-			duration: SNAPCHANGE_ANIMATION_TIME,
-			repeatCount: 1,
-			autoReverse: true,
-			mode: Clutter.AnimationMode.EASE_IN_OUT_BACK,
-			onStopped: () => {
-				this._direction = Clutter.Orientation.HORIZONTAL;
-			},
-		});
+		this._adjustment.value = value;
+		this._direction = Clutter.Orientation.HORIZONTAL;
 	}
 	easeOpacity(value, callback) {
-		easeActor(this, undefined, {
+		easeActor(this, {
 			opacity: value,
 			duration: UPDATED_WINDOW_ANIMATION_TIME,
 			mode: Clutter.AnimationMode.EASE_OUT_QUAD,
@@ -221,27 +196,54 @@ const TilePreview = GObject.registerClass(class TilePreview extends St.Widget {
 	get adjustment() {
 		return this._adjustment;
 	}
+	getMinimizedBox(window, monitorWorkArea) {
+		const [has_icon, icon_geometry] = window.get_icon_geometry();
+		if (has_icon)
+			return icon_geometry;
+		const rect = monitorWorkArea.copy();
+		rect.width = 0;
+		rect.height = 0;
+		return rect;
+	}
+	getNormalBox(window) {
+		const normalBox = window.get_frame_rect();
+		if (window.get_maximized() !== Meta.MaximizeFlags.BOTH)
+			return normalBox;
+		const [width, height] = [
+			Math.round(normalBox.width * 0.05),
+			Math.round(normalBox.height * 0.05),
+		];
+		normalBox.x += width;
+		normalBox.width -= 2 * width;
+		normalBox.y += height;
+		normalBox.height -= 2 * height;
+		return normalBox;
+	}
+	getMaximizedBox(window) {
+		const monitor = window.get_monitor();
+		const maximizedBox = Main.layoutManager.getWorkAreaForMonitor(monitor);
+		if (!window.is_fullscreen())
+			return maximizedBox;
+		const height = Math.round(maximizedBox.height * 0.025);
+		maximizedBox.y += height;
+		maximizedBox.height -= 2 * height;
+		return maximizedBox;
+	}
 });
 var SnapWindowExtension = class SnapWindowExtension {
 	constructor() {
 		this._connectors = [];
-		this._directionChangeId = 0;
 		this._toggledDirection = false;
 		this._allowChangeDirection = false;
-		this._wmBlockedSignalId = 0;
-		this._wmSizeChangedId = 0;
-		this._swipeTracker = createSwipeTracker(global.stage, (ExtSettings.DEFAULT_OVERVIEW_GESTURE ? [4] : [3]), Shell.ActionMode.NORMAL, Clutter.Orientation.VERTICAL);
+		this._swipeTracker = createSwipeTracker(global.stage, (ExtSettings.DEFAULT_OVERVIEW_GESTURE ? [4] : [3]), Shell.ActionMode.NORMAL, Clutter.Orientation.VERTICAL, true, 1, { allowTouch: false });
 		this._swipeTracker.allowLongSwipes = true;
 		this._touchpadSwipeGesture = this._swipeTracker._touchpadGesture;
 		this._tilePreview = new TilePreview();
 		Main.layoutManager.uiGroup.add_child(this._tilePreview);
-		this._patchWMSizeChanged();
-	}
-	_patchWMSizeChanged() {
-		this._wmBlockedSignalId = block_signal_by_name(global.windowManager, 'size-changed');
-		this._wmSizeChangedId = global.windowManager.connect('size-changed', (shellwm, actor) => {
-			return WMsizeChangedWindow.call(Main.wm, shellwm, actor, this._tilePreview);
+		this._uiGroupAddedActorId = Main.layoutManager.uiGroup.connect('actor-added', () => {
+			Main.layoutManager.uiGroup.set_child_above_sibling(this._tilePreview, null);
 		});
+		Main.layoutManager.uiGroup.set_child_above_sibling(this._tilePreview, null);
 	}
 	apply() {
 		this._swipeTracker.orientation = Clutter.Orientation.VERTICAL;
@@ -250,17 +252,9 @@ var SnapWindowExtension = class SnapWindowExtension {
 		this._connectors.push(this._swipeTracker.connect('end', this._gestureEnd.bind(this)));
 	}
 	destroy() {
-		if (this._wmSizeChangedId) {
-			global.windowManager.disconnect(this._wmSizeChangedId);
-			this._wmSizeChangedId = 0;
-		}
-		if (this._wmBlockedSignalId) {
-			global.windowManager.unblock_signal_handler(this._wmBlockedSignalId);
-			this._wmBlockedSignalId = 0;
-		}
-		if (this._directionChangeId) {
-			GLib.source_remove(this._directionChangeId);
-			this._directionChangeId = 0;
+		if (this._uiGroupAddedActorId) {
+			Main.layoutManager.uiGroup.disconnect(this._uiGroupAddedActorId);
+			this._uiGroupAddedActorId = 0;
 		}
 		this._connectors.forEach(connector => this._swipeTracker.disconnect(connector));
 		Main.layoutManager.uiGroup.remove_child(this._tilePreview);
@@ -268,27 +262,40 @@ var SnapWindowExtension = class SnapWindowExtension {
 		this._tilePreview.destroy();
 	}
 	_gestureBegin(tracker, monitor) {
-		if (this._directionChangeId) {
-			GLib.source_remove(this._directionChangeId);
-			this._directionChangeId = 0;
-		}
 		const window = global.display.get_focus_window();
-		if (!window || window.is_fullscreen() || !window.can_maximize()) {
+		// fullscreen window's can't be maximized :O
+		// if window can't be maximized and window is not fullscreen, return
+		if (!window || !(window.can_maximize() || window.is_fullscreen())) {
 			return;
 		}
+		// window is on different monitor
 		if (window.get_monitor() !== monitor) {
 			return;
 		}
 		const currentMonitor = window.get_monitor();
-		const monitorGeo = global.display.get_monitor_geometry(currentMonitor);
-		const progress = window.get_maximized() === Meta.MaximizeFlags.BOTH ? 1 : 0;
+		const monitorArea = global.display.get_monitor_geometry(currentMonitor);
+		const progress = window.is_fullscreen() ? GestureMaxUnMaxState.FULLSCREEN
+			: window.get_maximized() === Meta.MaximizeFlags.BOTH ? GestureMaxUnMaxState.MAXIMIZE : GestureMaxUnMaxState.UNMAXIMIZE;
 		this._toggledDirection = false;
-		this._allowChangeDirection = progress === 0;
-		const snapPoints = progress === 1 ?
-			[GestureMaxUnMaxState.UNMAXIMIZE, GestureMaxUnMaxState.MAXIMIZE] :
-			[GestureTileState.RIGHT_TILE, GestureTileState.NORMAL, GestureTileState.LEFT_TILE];
-		if (this._tilePreview.open(window, progress ? GestureMaxUnMaxState.MAXIMIZE : GestureMaxUnMaxState.UNMAXIMIZE)) {
-			tracker.confirmSwipe(monitorGeo.height, snapPoints, progress, progress);
+		this._allowChangeDirection = false;
+		const snapPoints = [];
+		switch (progress) {
+			case GestureMaxUnMaxState.UNMAXIMIZE:
+				snapPoints.push(GestureTileState.RIGHT_TILE, GestureTileState.NORMAL, GestureTileState.LEFT_TILE);
+				// allow tiling gesture, when window is unmaximized and minimized gesture is not enabled
+				this._allowChangeDirection = !ExtSettings.ALLOW_MINIMIZE_WINDOW;
+				break;
+			case GestureMaxUnMaxState.MAXIMIZE:
+				snapPoints.push(GestureMaxUnMaxState.UNMAXIMIZE, GestureMaxUnMaxState.MAXIMIZE);
+				if (!window.is_monitor_sized() && !monitorArea.equal(window.get_buffer_rect()))
+					snapPoints.push(GestureMaxUnMaxState.FULLSCREEN);
+				break;
+			case GestureMaxUnMaxState.FULLSCREEN:
+				snapPoints.push(GestureMaxUnMaxState.MAXIMIZE, GestureMaxUnMaxState.FULLSCREEN);
+				break;
+		}
+		if (this._tilePreview.open(window, progress)) {
+			tracker.confirmSwipe(monitorArea.height, snapPoints, progress, progress);
 		}
 	}
 	_gestureUpdate(_tracker, progress) {
@@ -297,36 +304,20 @@ var SnapWindowExtension = class SnapWindowExtension {
 			this._tilePreview.adjustment.value = progress;
 			return;
 		}
-		if (progress >= GestureMaxUnMaxState.UNMAXIMIZE) {
-			if (this._directionChangeId) {
-				GLib.source_remove(this._directionChangeId);
-				this._directionChangeId = 0;
-			}
+		// if tiling gesture is not allowed or progress is above unmaximized state
+		if (!this._allowChangeDirection || progress >= GestureMaxUnMaxState.UNMAXIMIZE) {
 			this._tilePreview.adjustment.value = progress;
 		}
 		// switch to horizontal
-		else if (this._allowChangeDirection && progress <= 0.05) {
-			if (!this._directionChangeId) {
-				this._directionChangeId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, TRIGGER_GESTURE_DELAY, () => {
-					this._toggledDirection = true;
-					this._touchpadSwipeGesture.switchDirectionTo(Clutter.Orientation.HORIZONTAL);
-					this._swipeTracker._progress = GestureTileState.NORMAL;
-					this._swipeTracker._history.reset();
-					this._tilePreview.switchToSnapping();
-					this._directionChangeId = 0;
-					return GLib.SOURCE_REMOVE;
-				});
-			}
+		else if (this._allowChangeDirection && progress <= GestureMaxUnMaxState.UNMAXIMIZE - TRIGGER_THRESHOLD) {
+			this._toggledDirection = true;
+			this._touchpadSwipeGesture.switchDirectionTo(Clutter.Orientation.HORIZONTAL);
+			this._swipeTracker._progress = GestureTileState.NORMAL;
+			this._swipeTracker._history.reset();
+			this._tilePreview.switchToSnapping(GestureTileState.NORMAL);
 		}
 	}
 	_gestureEnd(_tracker, duration, progress) {
-		if (this._directionChangeId) {
-			GLib.source_remove(this._directionChangeId);
-			this._directionChangeId = 0;
-		}
-		if (!this._toggledDirection) {
-			progress = Math.clamp(progress, GestureMaxUnMaxState.UNMAXIMIZE, GestureMaxUnMaxState.MAXIMIZE);
-		}
 		this._tilePreview.finish(duration, progress);
 	}
 };
