@@ -4,52 +4,251 @@ size=18
 vertical=41
 
 [caffeine]
-nightlight-control='always'
+nightlight-control='never'
+show-indicator=true
+show-notifications=false
 user-enabled=true
+
+[clipboard-history]
+clear-history=['<Shift><Super>x']
+disable-down-arrow=true
+display-mode=2
+next-entry=['<Shift><Alt>v']
+notify-on-copy=false
+paste-on-selection=false
+private-mode=false
+toggle-private-mode=['<Shift><Super>z']
+topbar-preview-size=10
 
 [clipboard-indicator]
 clear-history=['<Primary><Alt>x']
 disable-down-arrow=true
 history-size=50
+move-item-first=false
 next-entry=['<Primary><Alt>v']
 prev-entry=['<Primary><Shift><Alt>v']
 toggle-menu=['<Primary><Alt>c']
 
 [dash-to-dock]
 apply-custom-theme=false
+autohide=true
+autohide-in-fullscreen=true
 background-opacity=0.80000000000000004
 custom-theme-customize-running-dots=false
 custom-theme-shrink=true
 dash-max-icon-size=43
+dock-fixed=false
 dock-position='BOTTOM'
 force-straight-corner=false
 height-fraction=0.89000000000000001
+hot-keys=false
+intellihide=true
+intellihide-mode='ALL_WINDOWS'
 preview-size-scale=0.0
 running-indicator-dominant-color=true
 running-indicator-style='DASHES'
+show-apps-at-top=true
+show-mounts=false
+show-trash=false
 transparency-mode='DYNAMIC'
 unity-backlit-items=false
+
+[flypie]
+active-stack-child='menu-editor-page'
+center-color-mode='auto'
+center-color-mode-hover='auto'
+child-color-mode='auto'
+child-color-mode-hover='auto'
+grandchild-color-mode='parent'
+grandchild-color-mode-hover='parent'
+menu-configuration='[{"name":"Example Menu","icon":"system-hibernate-symbolic","shortcut":"<Alt><Super>space","centered":true,"id":0,"children":[{"name":"System","type":"System","icon":"system-log-out","angle":-1,"data":{}},{"name":"Launch Application","type":"Command","icon":"utilities-terminal","data":{"command":"insomnia; code;"},"angle":-1}],"type":"CustomMenu","data":{},"angle":-1}]'
+stashed-items='[{"name":"Running Apps","icon":"preferences-system-windows","type":"RunningApps","data":{"activeWorkspaceOnly":false,"appGrouping":true,"hoverPeeking":true,"nameRegex":""},"angle":-1},{"name":"Previous Workspace","icon":"go-previous","type":"Shortcut","data":{"shortcut":"<Control><Alt>Left"},"angle":270},{"name":"Fly-Pie Settings","icon":"applications-system","type":"Command","data":"gnome-extensions prefs flypie@schneegans.github.com","angle":-1},{"name":"Maximize Window","icon":"view-fullscreen","type":"Shortcut","data":"<Alt>F10","angle":-1},{"name":"Close Window","icon":"window-close","type":"Shortcut","data":"<Alt>F4","angle":-1},{"name":"Favorites","icon":"emblem-favorite","type":"Favorites","data":{},"angle":-1},{"name":"Sound","icon":"audio-speakers","children":[{"name":"Mute","icon":"🔈️","type":"Shortcut","data":"AudioMute","angle":-1},{"name":"Play / Pause","icon":"⏯️","type":"Shortcut","data":"AudioPlay","angle":-1},{"name":"Next Title","icon":"⏩️","type":"Shortcut","data":"AudioNext","angle":90},{"name":"Previous Title","icon":"⏪️","type":"Shortcut","data":"AudioPrev","angle":270}],"type":"CustomMenu","data":{},"angle":-1},{"name":"Next Workspace","icon":"go-next","type":"Shortcut","data":{"shortcut":"<Control><Alt>Right"},"angle":-1}]'
+stats-abortions=uint32 12
+stats-added-items=uint32 4
+stats-best-tutorial-time=uint32 835
+stats-click-selections-depth1=uint32 4
+stats-click-selections-depth3=uint32 4
+stats-dbus-menus=uint32 15
+stats-gesture-selections-depth2=uint32 1
+stats-gesture-selections-depth3=uint32 7
+stats-last-tutorial-time=uint32 10450
+stats-preview-menus=uint32 1
+stats-selections=uint32 16
+stats-selections-1000ms-depth3=uint32 2
+stats-selections-2000ms-depth3=uint32 6
+stats-selections-3000ms-depth3=uint32 7
+stats-settings-opened=uint32 3
+stats-tutorial-menus=uint32 15
+
+[gamemode]
+active-color='rgb(115,210,22)'
+
+[gestureImprovements]
+follow-natural-scroll=true
+touchpad-pinch-speed=0.31
+touchpad-speed-scale=0.80000000000000004
+
+[gsconnect]
+devices=['67247e94fe4937e4']
+id='6e017588-f448-4e8b-975f-1bb10deb0f7b'
+name='niksayspc'
+show-indicators=false
+
+[gsconnect/device/67247e94fe4937e4]
+certificate-pem='-----BEGIN CERTIFICATE-----\nMIIC9zCCAd+gAwIBAgIBATANBgkqhkiG9w0BAQsFADA/MRkwFwYDVQQDDBA2NzI0\nN2U5NGZlNDkzN2U0MRQwEgYDVQQLDAtLREUgQ29ubmVjdDEMMAoGA1UECgwDS0RF\nMB4XDTIwMDkyMDIxMDAwMFoXDTMwMDkyMDIxMDAwMFowPzEZMBcGA1UEAwwQNjcy\nNDdlOTRmZTQ5MzdlNDEUMBIGA1UECwwLS0RFIENvbm5lY3QxDDAKBgNVBAoMA0tE\nRTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALrHkegveZTfZBBabfJq\nsbsP08gPY8ZpBe7beLBEriZPl840ULjEDqXVdPeKjdxEmfcjU+psu+spi6R1v9jR\nEhU7Ruen0Qp9doeVtHdw7iEGhgyLhg+93qRq62bQw/jHEMsgGyNJ2ItihzVc6AQZ\nfo2RKsRUbb1QWNk+mv96oUJvbEXcWjoTuc/T1JxXSJ7L63bpJg6clG47r9JK8sxg\n9s5c9kIavVMySjN1mNzcfe0etujyq0YLUWVITw4t1VIK3Bkpl3CmwULrsiP/phWc\nzYsCqmsmaqYdS2h6rqTgUmFvWnjSeoV1AV5i7v5ZY8YxPsRzXt9pJBiwrVrHNP+g\nIacCAwEAATANBgkqhkiG9w0BAQsFAAOCAQEAbG7LXdErH2cpa7pwmv2fdVh6n4NX\np9pPHxc9hk5SW4Bt4KINKQKliA+tIE9qbqz8+8YtfGzZ+o9y3EYdSJG+rXcvytgN\nmiMnFqv7OllpGuaMiGBLhwgFGbgBYDNZvESCjGSEbaIlmBovmO8oZh5NzYSz6NHD\nbdOgFdexGi9g5GvSmMjSTxdXhFR1eqTQVtYFJF4CpcaES0aucF+YrlHPngr8TJgb\nASyrBJNq73pafOrNh5RsFFjDJWeWReMrL4Zxl9DkR0BnAfQejU0bmtBL0kK9zEjB\n0VuSMt9nz6FjRXZoRP707ZNRwNAsaVRQIdwzKB+0l++ptRrM1GNR057i3Q==\n-----END CERTIFICATE-----\n'
+incoming-capabilities=['kdeconnect.battery', 'kdeconnect.battery.request', 'kdeconnect.bigscreen.stt', 'kdeconnect.clipboard', 'kdeconnect.clipboard.connect', 'kdeconnect.connectivity_report.request', 'kdeconnect.contacts.request_all_uids_timestamps', 'kdeconnect.contacts.request_vcards_by_uid', 'kdeconnect.findmyphone.request', 'kdeconnect.mousepad.keyboardstate', 'kdeconnect.mousepad.request', 'kdeconnect.mpris', 'kdeconnect.mpris.request', 'kdeconnect.notification', 'kdeconnect.notification.action', 'kdeconnect.notification.reply', 'kdeconnect.notification.request', 'kdeconnect.photo.request', 'kdeconnect.ping', 'kdeconnect.runcommand', 'kdeconnect.sftp.request', 'kdeconnect.share.request', 'kdeconnect.share.request.update', 'kdeconnect.sms.request', 'kdeconnect.sms.request_attachment', 'kdeconnect.sms.request_conversation', 'kdeconnect.sms.request_conversations', 'kdeconnect.systemvolume', 'kdeconnect.telephony.request', 'kdeconnect.telephony.request_mute']
+last-connection='lan://192.168.40.102:1716'
+name='Redmi Note 8 Pro'
+outgoing-capabilities=['kdeconnect.battery', 'kdeconnect.battery.request', 'kdeconnect.bigscreen.stt', 'kdeconnect.clipboard', 'kdeconnect.clipboard.connect', 'kdeconnect.connectivity_report', 'kdeconnect.contacts.response_uids_timestamps', 'kdeconnect.contacts.response_vcards', 'kdeconnect.findmyphone.request', 'kdeconnect.mousepad.echo', 'kdeconnect.mousepad.keyboardstate', 'kdeconnect.mousepad.request', 'kdeconnect.mpris', 'kdeconnect.mpris.request', 'kdeconnect.notification', 'kdeconnect.notification.request', 'kdeconnect.photo', 'kdeconnect.ping', 'kdeconnect.presenter', 'kdeconnect.runcommand.request', 'kdeconnect.sftp', 'kdeconnect.share.request', 'kdeconnect.sms.attachment_file', 'kdeconnect.sms.messages', 'kdeconnect.systemvolume.request', 'kdeconnect.telephony']
+paired=true
+supported-plugins=['battery', 'clipboard', 'connectivity_report', 'contacts', 'findmyphone', 'mousepad', 'mpris', 'notification', 'photo', 'ping', 'presenter', 'runcommand', 'sftp', 'share', 'sms', 'systemvolume', 'telephony']
+type='phone'
+
+[gsconnect/device/67247e94fe4937e4/plugin/battery]
+custom-battery-notification=true
+custom-battery-notification-value=uint32 80
+full-battery-notification=true
+
+[gsconnect/device/67247e94fe4937e4/plugin/notification]
+applications='{"Printers":{"iconName":"printer","enabled":true},"Desktop Sharing":{"iconName":"preferences-desktop-remote-desktop","enabled":true},"Add/Remove Software":{"iconName":"system-software-install","enabled":true},"Snapd User Session Agent":{"iconName":"application-x-executable","enabled":true},"Timeshift":{"iconName":"timeshift","enabled":true},"Date & Time":{"iconName":"preferences-system-time","enabled":true},"Disk Usage Analyser":{"iconName":"org.gnome.baobab","enabled":true},"Geary":{"iconName":"org.gnome.Geary","enabled":true},"Power":{"iconName":"gnome-power-manager","enabled":true},"Colour":{"iconName":"preferences-color","enabled":true},"Clocks":{"iconName":"org.gnome.clocks","enabled":true},"Backups":{"iconName":"org.gnome.DejaDup","enabled":true},"Files":{"iconName":"org.gnome.Nautilus","enabled":true},"Archive Manager":{"iconName":"org.gnome.ArchiveManager","enabled":true},"Spotify":{"iconName":"","enabled":true},"GNOME Shell integration":{"iconName":"org.gnome.ChromeGnomeShell","enabled":true},"discord":{"iconName":"","enabled":true},"Transmission":{"iconName":"transmission","enabled":true},"Firefox":{"iconName":"","enabled":true},"Evolution Alarm Notify":{"iconName":"appointment-soon","enabled":true},"Disk Space":{"iconName":"drive-harddisk-symbolic","enabled":true},"Tweaks":{"iconName":"gnome-tweaks","enabled":true},"Software":{"iconName":"org.gnome.Software","enabled":true},"Fragments":{"iconName":"list-add-symbolic","enabled":true},"Disk Usage Analyzer":{"iconName":"org.gnome.baobab","enabled":true}}'
+send-active=false
+
+[gsconnect/device/67247e94fe4937e4/plugin/runcommand]
+command-list={'3f12594b-185f-4249-8300-8d59235093e4': <{'name': 'freeze', 'command': ' ydotool key ctrl+alt+/'}>}
+
+[gsconnect/device/67247e94fe4937e4/plugin/share]
+receive-directory='/home/niksays/Downloads'
+
+[gsconnect/device/67247e94fe4937e4/plugin/telephony]
+ringing-pause=true
+
+[gsconnect/device/_f1c9651c_fe02_4db0_a073_e5174f92efd1_]
+incoming-capabilities=['kdeconnect.battery', 'kdeconnect.battery.request', 'kdeconnect.bigscreen.stt', 'kdeconnect.clipboard', 'kdeconnect.clipboard.connect', 'kdeconnect.connectivity_report', 'kdeconnect.contacts.response_uids_timestamps', 'kdeconnect.contacts.response_vcards', 'kdeconnect.findmyphone.request', 'kdeconnect.lock', 'kdeconnect.lock.request', 'kdeconnect.mousepad.echo', 'kdeconnect.mousepad.keyboardstate', 'kdeconnect.mousepad.request', 'kdeconnect.mpris', 'kdeconnect.mpris.request', 'kdeconnect.notification', 'kdeconnect.notification.request', 'kdeconnect.photo', 'kdeconnect.ping', 'kdeconnect.presenter', 'kdeconnect.runcommand', 'kdeconnect.runcommand.request', 'kdeconnect.sftp', 'kdeconnect.share.request', 'kdeconnect.sms.attachment_file', 'kdeconnect.sms.messages', 'kdeconnect.systemvolume', 'kdeconnect.systemvolume.request', 'kdeconnect.telephony']
+last-connection='lan://192.168.40.103:1716'
+name='zs'
+outgoing-capabilities=['kdeconnect.battery', 'kdeconnect.battery.request', 'kdeconnect.bigscreen.stt', 'kdeconnect.clipboard', 'kdeconnect.clipboard.connect', 'kdeconnect.connectivity_report.request', 'kdeconnect.contacts.request_all_uids_timestamps', 'kdeconnect.contacts.request_vcards_by_uid', 'kdeconnect.findmyphone.request', 'kdeconnect.lock', 'kdeconnect.lock.request', 'kdeconnect.mousepad.keyboardstate', 'kdeconnect.mousepad.request', 'kdeconnect.mpris', 'kdeconnect.mpris.request', 'kdeconnect.notification', 'kdeconnect.notification.action', 'kdeconnect.notification.reply', 'kdeconnect.notification.request', 'kdeconnect.photo.request', 'kdeconnect.ping', 'kdeconnect.runcommand', 'kdeconnect.runcommand.request', 'kdeconnect.sftp.request', 'kdeconnect.share.request', 'kdeconnect.share.request.update', 'kdeconnect.sms.request', 'kdeconnect.sms.request_attachment', 'kdeconnect.sms.request_conversation', 'kdeconnect.sms.request_conversations', 'kdeconnect.systemvolume', 'kdeconnect.systemvolume.request', 'kdeconnect.telephony.request_mute']
+supported-plugins=['battery', 'clipboard', 'findmyphone', 'mousepad', 'mpris', 'notification', 'photo', 'ping', 'runcommand', 'share', 'systemvolume']
+type='desktop'
+
+[gsconnect/device/_f1c9651c_fe02_4db0_a073_e5174f92efd1_/plugin/battery]
+custom-battery-notification-value=uint32 80
+
+[gsconnect/device/_f1c9651c_fe02_4db0_a073_e5174f92efd1_/plugin/notification]
+applications='{"Printers":{"iconName":"printer","enabled":true},"Desktop Sharing":{"iconName":"preferences-desktop-remote-desktop","enabled":true},"Add/Remove Software":{"iconName":"system-software-install","enabled":true},"Snapd User Session Agent":{"iconName":"application-x-executable","enabled":true},"Date & Time":{"iconName":"preferences-system-time","enabled":true},"Timeshift":{"iconName":"timeshift","enabled":true},"Disk Usage Analyser":{"iconName":"org.gnome.baobab","enabled":true},"Geary":{"iconName":"org.gnome.Geary","enabled":true},"Power":{"iconName":"gnome-power-manager","enabled":true},"Backups":{"iconName":"org.gnome.DejaDup","enabled":true},"Colour":{"iconName":"preferences-color","enabled":true},"Files":{"iconName":"org.gnome.Nautilus","enabled":true},"Clocks":{"iconName":"org.gnome.clocks","enabled":true},"Archive Manager":{"iconName":"org.gnome.ArchiveManager","enabled":true}}'
+
+[gsconnect/device/_f1c9651c_fe02_4db0_a073_e5174f92efd1_/plugin/share]
+receive-directory='/home/niksays/Downloads'
+
+[gsconnect/messaging]
+window-maximized=false
+window-size=(640, 480)
+
+[gsconnect/preferences]
+window-maximized=false
+window-size=(754, 440)
 
 [lockkeys]
 style='show-hide'
 
+[materialshell/layouts]
+default-layout='half'
+float=false
+half=true
+ratio-value=0.54999999999999993
+split=false
+windows-excluded='Enpass,Gnome-layout-switcher'
+
+[materialshell/theme]
+clock-horizontal=true
+primary-color='#2eb398'
+taskbar-item-style='name'
+
 [ncom/github/hermes83/compiz-alike-windows-effect]
-friction=66.427457226372752
+friction=66.42746113989638
 manual-restore-factor=2.1191709844559585
-maximize-effect-enabled=true
+maximize-effect-enabled=false
 resize-effect-enabled=false
 skip-frames-before-spring-start=20.0
 spring=13.593264248704662
 x-tiles=3.0
 y-tiles=3.0
 
+[ncom/github/hermes83/compiz-windows-effect]
+friction=1.0
+js-engine=true
+object-movement-range=10.0
+speedup-factor-divider=1.0
+spring-k=10.0
+x-tiles=7.0
+y-tiles=6.0
+
+[nightthemeswitcher]
+commands-enabled=false
+gtk-variant-day='Adwaita-maia-compact'
+gtk-variant-night='Adwaita-maia-compact-dark'
+manual-gtk-variants=false
+manual-shell-variants=false
+manual-time-source=true
+ondemand-time='night'
+settings-version=1
+shell-variant-day='Adwaita-maia-compact'
+shell-variant-night='Adwaita-maia-compact-dark'
+time-source='ondemand'
+
+[nightthemeswitcher/commands]
+enabled=false
+sunrise='sed -i "s/Adwaita-maia-dark.conf/Adwaita-maia.conf/" ~/.config/qt5ct/qt5ct.conf'
+sunset='sed -i "s/Adwaita-maia.conf/Adwaita-maia-dark.conf/" ~/.config/qt5ct/qt5ct.conf'
+
+[nightthemeswitcher/gtk-variants]
+day='Matcha-azul'
+manual=true
+night='Matcha-dark-azul'
+
+[nightthemeswitcher/shell-variants]
+day='Adwaita-maia-compact'
+enabled=false
+manual=true
+night='Adwaita-maia-compact-dark'
+
+[nightthemeswitcher/time]
+manual-time-source=true
+nightthemeswitcher-ondemand-keybinding=['<Shift><Super>t']
+ondemand-time='night'
+time-source='ondemand'
+
+[notification-timeout]
+ignore-idle=true
+
 [panel-osd]
-test-notification=false
+force-expand=false
+test-delay=2.0
+test-notification=true
 x-pos=100.0
+y-pos=100.0
 
 [pop-shell]
 pop-monitor-left=@as []
 pop-workspace-down=@as []
 
+[shell-volume-mixer]
+position='aggregateMenu'
+use-symbolic-icons=true
+
+[unite]
+autofocus-windows=true
+enable-titlebar-actions=true
+extend-left-box=false
+greyscale-tray-icons=true
+restrict-to-primary-screen=true
+show-desktop-name=true
+show-legacy-tray=true
+window-buttons-theme='default'
+
 [user-theme]
-name='Matcha-dark-sea'
+name=''
+
+[vertical-overview]
+dash-max-height=100
+hide-dash=false
+override-dash=false
