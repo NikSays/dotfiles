@@ -10,14 +10,16 @@ show-notifications=false
 user-enabled=true
 
 [clipboard-history]
-clear-history=['<Shift><Super>x']
+clear-history=['<Control><Alt>x']
 disable-down-arrow=true
 display-mode=2
-next-entry=['<Shift><Alt>v']
+next-entry=['<Alt>v']
 notify-on-copy=false
 paste-on-selection=false
+prev-entry=['<Alt><Super>v']
 private-mode=false
-toggle-private-mode=['<Shift><Super>z']
+toggle-menu=['<Control><Alt>v']
+toggle-private-mode=['<Alt><Super>z']
 topbar-preview-size=10
 
 [clipboard-indicator]
