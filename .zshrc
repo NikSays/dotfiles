@@ -160,7 +160,9 @@ POW_SRC=~/.p10k.zsh
 if [ $(tput colors) -gt 8 ]; then
 	POW_SRC=~/.p10k.color.zsh
 fi
-# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
-# [[ ! -f $POW_SRC ]] ||
 source $POW_SRC 
-source /usr/share/nvm/init-nvm.sh
+
+if [[ -f "/usr/share/nvm/init-nvm.sh" ]]; then
+	source /usr/share/nvm/init-nvm.sh
+fi
+
