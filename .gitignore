@@ -21,9 +21,6 @@
 !.local/bin
 !.local/bin/git-dotfile-track
 !.local/bin/git-dotfile-track/**
-!.local/share/gnome-shell
-!.local/share/gnome-shell/extensions
-!.local/share/gnome-shell/extensions/**
 !.local/share/wallpapers
 !.local/share/wallpapers/custom
 !.local/share/wallpapers/custom/**

@@ -6,6 +6,7 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
+export PATH="${PATH}:/home/niksays/.local/bin"
 
 # The following lines were added by compinstall
 
@@ -46,7 +47,6 @@ bindkey -e
 
 # Path to your oh-my-zsh installation.
   export ZSH="/home/"$USER"/.oh-my-zsh"
-
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time oh-my-zsh is loaded, in which case,
 # to know which specific one was loaded, run: echo $RANDOM_THEME
@@ -123,7 +123,7 @@ source $ZSH/oh-my-zsh.sh
 
 # Preferred editor for local and remote sessions
 # if [[ -n $SSH_CONNECTION ]]; then
-export EDITOR='vim'
+export EDITOR='nvim'
 # else
 #   export EDITOR='mvim'
 # fi
@@ -147,7 +147,7 @@ alias sudi="sudo -i"
 alias git-dotfile='/usr/bin/git --git-dir=$HOME/.dotfile-repo/ --work-tree=$HOME'
 alias dconf-extension-dump='dconf dump /org/gnome/shell/extensions/ > ~/.local/share/gnome-shell/extensions/extension-settings.dconf'
 alias dconf-extension-load='dconf load /org/gnome/shell/extensions/ < ~/.local/share/gnome-shell/extensions/extension-settings.dconf'
-alias tmux='tmux attach-session -t main||tmux source-file ~/.tmux/default-session.conf'
+alias tmuxs='tmux attach-session -t main||tmux source-file ~/.tmux/default-session.conf'
 TZ='Asia/Jerusalem'; export TZ
 #powerline-daemon -q
 #. /usr/lib/python3.8/site-packages/powerline/bindings/zsh/powerline.zsh
@@ -166,3 +166,7 @@ if [[ -f "/usr/share/nvm/init-nvm.sh" ]]; then
 	source /usr/share/nvm/init-nvm.sh
 fi
 
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
