@@ -1,0 +1,112 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json
+version: 2
+final_space: true
+console_title_template: "{{ .UserName }}{{ if .Segments.Session.SSHSession }}@{{ .HostName }}{{ end }} in {{ .Folder }}"
+
+palette:
+  bg: "black"
+  connectors: "darkGray"
+  ok:      "green"
+  err:     "red"
+  fg_user: "blue"
+  fg_root: "lightYellow"
+  fg_host: "yellow"
+  fg_path: "cyan"
+  fg_path_bright: "lightCyan"
+  fg_git:  "lightGreen"
+  fg_k8s:  "magenta"
+  fg_time: "lightMagenta"
+var: 
+  sep: " <p:connectors>|</> " 
+
+blocks:
+  - type: prompt
+    alignment: left
+    newline: true
+    segments:
+      - type: session
+        style: plain
+        template: " {{ .UserName }}"
+        foreground_templates:
+          - "{{ if .Root }}p:fg_root{{ end }}"
+        foreground: p:fg_user
+        background: p:bg
+      - type: session
+        style: plain
+        template: "{{ if .SSHSession }}{{ .Var.sep }}{{ .HostName }}{{ end }}"
+        foreground: p:fg_host
+        background: p:bg
+      - type: path
+        style: plain
+        foreground: p:fg_path
+        background: p:bg
+        template: "{{ .Var.sep }}{{ .Path }}{{ if not .Writable}} <p:fg_root>(RO)</>{{ end }}"
+        properties:
+          style: full
+          right_format: "<b><p:fg_path_bright>%s</></b>"
+          gitdir_format: "<b><p:fg_path_bright>%s</></b>"
+      - type: git
+        style: plain
+        foreground: p:fg_git
+        background: p:bg
+        template:
+          "{{ .Var.sep }}{{ .HEAD }}{{ if or (.Working.Changed) (.Staging.Changed) }}*{{ end
+          }} {{ if gt .Behind 0 }}⇣{{ end }}{{ if gt .Ahead 0 }}⇡{{ end
+          }}"
+        properties:
+          branch_icon: ""
+          commit_icon: "@"
+          fetch_status: true
+  - type: prompt
+    overflow: hide
+    alignment: right
+    segments:
+      - type: status
+        style: plain
+        background: "p:bg"
+        foreground_templates:
+          - "{{if gt .Code 0}}p:err{{end}}"
+          - "{{if eq .Code 0}}p:ok{{end}}"
+        template: "{{ .String}}"
+        properties:
+          always_enabled: true
+      - type: executiontime
+        style: plain
+        foreground: p:fg_time
+        background: p:bg
+        template: "{{ .Var.sep }}{{ .FormattedMs }}"
+        properties:
+          threshold: 5000
+  - type: prompt
+    alignment: left
+    newline: true
+    segments:
+      - type: text
+        style: plain
+        template: ">"
+
+tooltips:
+  - type: kubectl
+    tips:
+      - k
+      - kubectl
+      - kns
+      - kubens
+      - kctx
+      - kubectx
+    style: plain
+    leading_diamond: "<|"
+    trailing_diamond: " "
+    foreground: p:fg_k8s
+    background: p:bg
+    template: "{{ .Context }}/{{ if .Namespace }}{{ .Namespace }}{{ else }}default{{ end }}"
+    properties:
+      parse_kubeconfig: true
+
+transient_prompt:
+  foreground_templates:
+    - "{{if gt .Code 0}}p:err{{end}}"
+    - "{{if eq .Code 0}}p:ok{{end}}"
+  template: ") "
+secondary_prompt:
+  template: "> "

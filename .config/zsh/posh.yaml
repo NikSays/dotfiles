@@ -1,0 +1,126 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json
+version: 2
+final_space: true
+console_title_template: "{{ .UserName }}{{ if .Segments.Session.SSHSession }}@{{ .HostName }}{{ end }} in {{ .Folder }}"
+
+palette:
+  bg: "#343434"
+  connectors: "#666"
+  ok:      "#5e5"
+  err:     "#e55"
+  fg_user: "#49f"
+  fg_root: "#f83"
+  fg_host: "#fd5"
+  fg_path: "#4a9"
+  fg_path_bright: "#6cb"
+  fg_git:  "#7d7"
+  fg_k8s:  "#88f"
+  fg_time: "#89b"
+var: 
+  sep: " <p:connectors>│</> " 
+
+blocks:
+  - type: prompt
+    alignment: left
+    newline: true
+    trailing_diamond: █
+    segments:
+      - type: text
+        style: diamond
+        foreground: p:connectors
+        background: transparent
+        template: "╭─"
+      - type: session
+        style: diamond
+        template: " {{ .UserName }}"
+        foreground_templates:
+          - "{{ if .Root }}p:fg_root{{ end }}"
+        foreground: p:fg_user
+        background: p:bg
+      - type: session
+        style: diamond
+        template: "{{ if .SSHSession }}{{ .Var.sep }}{{ .HostName }}{{ end }}"
+        foreground: p:fg_host
+        background: p:bg
+      - type: path
+        style: diamond
+        foreground: p:fg_path
+        background: p:bg
+        template: "{{ .Var.sep }}{{ .Path }}{{ if not .Writable}} <p:fg_root>(RO)</>{{ end }}"
+        properties:
+          style: full
+          right_format: "<b><p:fg_path_bright>%s</></b>"
+          gitdir_format: "<b><p:fg_path_bright>%s</></b>"
+      - type: git
+        style: diamond
+        foreground: p:fg_git
+        background: p:bg
+        template:
+          "{{ .Var.sep }}{{ .HEAD }}{{ if or (.Working.Changed) (.Staging.Changed) }}*{{ end
+          }} {{ if gt .Behind 0 }}⇣{{ end }}{{ if gt .Ahead 0 }}⇡{{ end
+          }}"
+        properties:
+          branch_icon: ""
+          commit_icon: "@"
+          fetch_status: true
+  - type: prompt
+    overflow: hide
+    alignment: right
+    filler: "<p:connectors,transparent>·</>"
+    leading_diamond: █
+    trailing_diamond: █
+    segments:
+      - type: status
+        style: diamond
+        background: "p:bg"
+        foreground_templates:
+          - "{{if gt .Code 0}}p:err{{end}}"
+          - "{{if eq .Code 0}}p:ok{{end}}"
+        template: "{{ .String}}"
+        properties:
+          always_enabled: true
+      - type: executiontime
+        style: diamond
+        foreground: p:fg_time
+        background: p:bg
+        template: "{{ .Var.sep }}{{ .FormattedMs }}"
+        properties:
+          threshold: 5000
+  - type: prompt
+    alignment: left
+    newline: true
+    segments:
+      - type: text
+        style: diamond
+        foreground: p:connectors
+        background: transparent
+        template: "╰─"
+
+tooltips:
+  - type: kubectl
+    tips:
+      - k
+      - kubectl
+      - kns
+      - kubens
+      - kctx
+      - kubectx
+    style: diamond
+    leading_diamond: █
+    trailing_diamond: █
+    foreground: p:fg_k8s
+    background: p:bg
+    template: "{{ .Context }}/{{ if .Namespace }}{{ .Namespace }}{{ else }}default{{ end }}"
+    properties:
+      parse_kubeconfig: true
+
+transient_prompt:
+  foreground_templates:
+    - "{{if gt .Code 0}}p:err{{end}}"
+    - "{{if eq .Code 0}}p:ok{{end}}"
+  background: transparent
+  template: "❯ "
+secondary_prompt:
+  foreground: white
+  background: transparent
+  template: "> "
