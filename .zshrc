@@ -58,10 +58,15 @@ bindkey "^[[1;6D" beginning-of-line # Ctrl Shift Right
 # Search by prefix
 autoload -U up-line-or-beginning-search
 zle -N up-line-or-beginning-search
+# raw (rmkx) vs applicaiton (smkx) mode difference. Sometimes it gets stuck in one or another.
+# oh-my-zsh sets them in zle-line-init and zle-line-finish. Too much hassle.
+bindkey "^[0A" "^[[A"
 bindkey "^[[A" up-line-or-beginning-search
+
 
 autoload -U down-line-or-beginning-search
 zle -N down-line-or-beginning-search
+bindkey "^[0B" "^[[B"
 bindkey "^[[B" down-line-or-beginning-search
 
 
